@@ -1,12 +1,11 @@
 package com.arpit.todo_list.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +17,9 @@ public class Tasks {
     private Long id;
     private String task;
     private boolean done;
+    private Date dueDate;
+    private Date dateCreated;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
 }

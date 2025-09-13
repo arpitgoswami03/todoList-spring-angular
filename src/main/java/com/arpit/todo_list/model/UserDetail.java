@@ -1,16 +1,31 @@
 package com.arpit.todo_list.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDetail{
-    @Id
-    private Long id;
+import java.util.Collection;
+import java.util.List;
+
+public class UserDetail implements UserDetails {
+
+    private Users user;
+
+    public UserDetail(Users user) {
+        this.user = user;
+    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
 }

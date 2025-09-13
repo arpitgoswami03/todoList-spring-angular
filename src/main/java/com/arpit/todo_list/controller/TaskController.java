@@ -19,36 +19,36 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<Tasks>> displayTasks() {
-        List<Tasks> tasks = taskService.getTasks();
+    @GetMapping("/{userId}/tasks")
+    public ResponseEntity<List<Tasks>> displayTasks(@PathVariable Long userId) {
+        List<Tasks> tasks = taskService.getTasks(userId);
         if (!tasks.isEmpty()) {
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
     }
 
-    @PostMapping("/")
-    public ResponseEntity<?> saveTask(@RequestBody Tasks task) {
-        int status = taskService.addTask(task);
+    @PostMapping("/{userId}/tasks")
+    public ResponseEntity<?> createTask(@RequestBody Tasks task, @PathVariable Long userId) {
+        int status = taskService.addTaskByUserId(task, userId);
         if (status == 1) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
-        int status = taskService.deleteTask(id);
+    @DeleteMapping("/{userId}/tasks")
+    public ResponseEntity<?> deleteTask(@PathVariable Long userId) {
+        int status = taskService.deleteTask(userId);
         if (status == 1) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/")
-    public ResponseEntity<?> updateTask(@RequestBody Tasks task) {
-        int status = taskService.updateTask(task);
+    @PutMapping("/{userId}/tasks")
+    public ResponseEntity<?> updateTask(@RequestBody Tasks task, @PathVariable Long userId) {
+        int status = taskService.updateTask(task, userId);
         if (status == 1) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
