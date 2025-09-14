@@ -12,24 +12,20 @@ public class UserDetail implements UserDetails {
     private Users user;
 
     public UserDetail(Users user) {
-        System.out.println("UserDetail");
         this.user = user;
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        System.out.println("getAuthorities");
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getPassword() {
-        System.out.println("getPassword");
         return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        System.out.println("getUsername");
         return user.getUsername();
     }
 }

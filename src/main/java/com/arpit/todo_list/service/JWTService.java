@@ -30,10 +30,10 @@ public class JWTService {
         long now = System.currentTimeMillis();
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + expiration))
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + expiration))
                 .signWith(secretKey)
                 .compact();
     }
@@ -49,10 +49,10 @@ public class JWTService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKey)
+                .verifyWith(secretKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

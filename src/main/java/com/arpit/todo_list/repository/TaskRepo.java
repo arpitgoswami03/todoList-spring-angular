@@ -11,9 +11,6 @@ import java.util.List;
 @Repository
 public interface TaskRepo extends JpaRepository<Tasks, Long> {
 
-    @Query("SELECT t FROM tasks t WHERE t.user.id = :userId")
-    List<Tasks> findAllByUserId(Long id);
-
     @Transactional
     @Modifying
     @Query("DELETE FROM tasks t WHERE t.id = :taskId AND t.user.id = :userId")
