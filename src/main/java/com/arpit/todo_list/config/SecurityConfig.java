@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,8 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private UserDetailsService userDetailsService;
-    private JWTFilter jwtFilter;
+    private final UserDetailsService userDetailsService;
+    private final JWTFilter jwtFilter;
 
     @Autowired
     public SecurityConfig(JWTFilter jwtFilter, UserDetailsService userDetailsService) {
@@ -28,21 +29,30 @@ public class SecurityConfig {
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        System.out.println("securityFilterChain");
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(customizer -> customizer.anyRequest().permitAll())
+                .authorizeHttpRequests(customizer ->
+                        customizer
+                                .requestMatchers("/login", "/register")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    public AuthenticationManager AuthenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        System.out.println("AuthenticationManager");
          return authConfig.getAuthenticationManager();
     }
 
     @Bean
     public BCryptPasswordEncoder PasswordEncoder(){
+        System.out.println("BCryptPasswordEncoder");
         return new BCryptPasswordEncoder();
     }
 }

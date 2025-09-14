@@ -2,51 +2,66 @@ package com.arpit.todo_list.controller;
 
 import com.arpit.todo_list.model.Users;
 import com.arpit.todo_list.repository.UserRepo;
+import com.arpit.todo_list.service.JWTService;
 import com.arpit.todo_list.service.UsersService;
-import org.apache.tomcat.jni.CertificateVerifier;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
+@CrossOrigin("*")
 public class UserController {
 
+    private final UsersService usersService;
     private final UserRepo userRepo;
-    private final UsersService userService;
 
     @Autowired
-    public UserController(UserRepo userRepo, UsersService userService) {
+    public UserController(UsersService usersService, UserRepo userRepo) {
+        this.usersService = usersService;
         this.userRepo = userRepo;
-        this.userService = userService;
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam Users user) {
-        return ResponseEntity.ok(userService.verify(user));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestParam Users user) {
-        if(user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
+    public ResponseEntity<?> register(
+            @RequestBody Users user) {
+        if (user.getUsername().isBlank() ||
+                user.getPassword().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        if(userRepo.findByEUsername(user.getUsername()).isPresent()){
-            throw new RuntimeException("Username already exists");
-        }
-        userService.registerUser(user);
+        usersService.registerUser(user);
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(
+            @RequestBody Users user) {
+        String jwtToken = usersService.verify(user);
+        if (jwtToken == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(jwtToken);
+    }
+
     @PutMapping("/{userId}/profile")
-    public ResponseEntity<?> updateUserDetails(@PathVariable long userId, @RequestBody Users user) {
-        Users oldUserDetails =  userRepo.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        oldUserDetails.setUsername(user.getUsername());
-        oldUserDetails.setPassword(user.getPassword());
-        userRepo.save(oldUserDetails);
+    public ResponseEntity<Users> updateUserProfile(
+            @PathVariable Long userId,
+            @RequestBody Users user
+    ) {
+        try {
+            Users updatedUser = usersService.updateProfile(userId, user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{userId}/profile")
+    public ResponseEntity<?> deleteUserProfile(@PathVariable Long userId) {
+        if(userRepo.findById(userId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        userRepo.deleteById(userId);
         return ResponseEntity.ok().build();
     }
 

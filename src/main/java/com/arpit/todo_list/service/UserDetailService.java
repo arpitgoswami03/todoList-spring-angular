@@ -15,13 +15,16 @@ public class UserDetailService implements UserDetailsService {
     private UserRepo userRepo;
 
     @Autowired
-    public void setUserRepo(UserRepo userRepo) {
+    public UserDetailService(UserRepo userRepo) {
+        System.out.println("setUserRepo");
         this.userRepo = userRepo;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("loadUserByUsername");
         Users user = userRepo.findByUsername(username);
+        System.out.println(user);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
